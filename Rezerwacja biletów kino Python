@@ -1,0 +1,159 @@
+class Seat:
+    def __init__(self, number):
+        self.number = number
+        self.is_reserved = False
+
+
+class Show:
+    def __init__(self, title, date):
+        self.title = title
+        self.date = date
+        self.seats = []
+
+
+class Ticket:
+    def __init__(self, show, seat):
+        self.show = show
+        self.seat = seat
+
+
+class Customer:
+    def __init__(self, name, id):
+        self.name = name
+        self.id = id
+        self.tickets = []
+
+
+def find_customer(customers, id):
+    for i in range(len(customers)):
+        if customers[i].id == id:
+            return i
+    return -1
+
+
+def main():
+    customers = []
+    shows = []
+
+    show1 = Show("Straszny film", "2026-05-01")
+    show2 = Show("Avengers", "2026-05-02")
+    show3 = Show("Pila", "2026-05-06")
+    show4 = Show("Jak wytresowac smoka", "2026-05-10")
+    show5 = Show("Minecraft film", "2026-05-03")
+
+    for i in range(10):
+        show1.seats.append(Seat(i))
+        show2.seats.append(Seat(i))
+        show3.seats.append(Seat(i))
+        show4.seats.append(Seat(i))
+        show5.seats.append(Seat(i))
+
+    shows.extend([show1, show2, show3, show4, show5])
+
+    while True:
+        print("1. Dodaj klienta")
+        print("2. Rezerwuj bilet")
+        print("3. Wyswietl bilety klienta")
+        print("4. Wyswietl seanse i miejsca")
+        print("0. Wyjscie")
+
+        try:
+            choice = int(input("Wybor: "))
+        except:
+            continue
+
+        if choice == 1:
+            name = input("Imie i nazwisko: ")
+
+            try:
+                id = int(input("ID: "))
+            except:
+                print("Blad ID")
+                continue
+
+            customers.append(Customer(name, id))
+            print("Dodano klienta")
+
+        elif choice == 2:
+            try:
+                id = int(input("Podaj ID klienta: "))
+            except:
+                continue
+
+            idx = find_customer(customers, id)
+            if idx == -1:
+                print("Brak klienta")
+                continue
+
+            print("Seanse:")
+            for i, s in enumerate(shows):
+                print(f"{i}. {s.title} ({s.date})")
+
+            try:
+                show_index = int(input("Wybierz seans: "))
+            except:
+                continue
+
+            if show_index < 0 or show_index >= len(shows):
+                continue
+
+            selected_show = shows[show_index]
+
+            print("Miejsca:")
+            for s in selected_show.seats:
+                status = "Zajete" if s.is_reserved else "Wolne"
+                print(f"{s.number} - {status}")
+
+            try:
+                seat_number = int(input("Wybierz miejsce: "))
+            except:
+                continue
+
+            if seat_number < 0 or seat_number >= len(selected_show.seats):
+                continue
+
+            if selected_show.seats[seat_number].is_reserved:
+                print("Miejsce zajete")
+                continue
+
+            selected_show.seats[seat_number].is_reserved = True
+
+            ticket = Ticket(selected_show, selected_show.seats[seat_number])
+            customers[idx].tickets.append(ticket)
+
+            print("Zarezerwowano bilet")
+
+        elif choice == 3:
+            try:
+                id = int(input("Podaj ID klienta: "))
+            except:
+                continue
+
+            idx = find_customer(customers, id)
+            if idx == -1:
+                print("Brak klienta")
+                continue
+
+            c = customers[idx]
+
+            if not c.tickets:
+                print("Brak biletow")
+            else:
+                print("Bilety:")
+                for t in c.tickets:
+                    print(f"Seans: {t.show.title}, Data: {t.show.date}, Miejsce: {t.seat.number}")
+
+        elif choice == 4:
+            for s in shows:
+                print(f"{s.title} ({s.date})")
+                for seat in s.seats:
+                    status = "Zajete" if seat.is_reserved else "Wolne"
+                    print(f"Miejsce {seat.number}: {status}")
+
+        elif choice == 0:
+            print("Koniec programu")
+            break
+
+
+if __name__ == "__main__":
+    main()
