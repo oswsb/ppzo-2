@@ -1,0 +1,203 @@
+using System;
+using System.Collections.Generic;
+
+class Seat
+{
+    public int number;
+    public bool isReserved;
+}
+
+class Show
+{
+    public string title;
+    public string date;
+    public List<Seat> seats = new List<Seat>();
+}
+
+class Ticket
+{
+    public Show show;
+    public Seat seat;
+}
+
+class Customer
+{
+    public string name;
+    public int id;
+    public List<Ticket> tickets = new List<Ticket>();
+}
+
+class Program
+{
+    static int FindCustomer(List<Customer> customers, int id)
+    {
+        for (int i = 0; i < customers.Count; i++)
+        {
+            if (customers[i].id == id) return i;
+        }
+        return -1;
+    }
+
+    static void Main()
+    {
+        List<Customer> customers = new List<Customer>();
+        List<Show> shows = new List<Show>();
+
+        Show show1 = new Show { title = "Straszny film", date = "2026-05-01" };
+        Show show2 = new Show { title = "Avengers", date = "2026-05-02" };
+        Show show3 = new Show { title = "Pila", date = "2026-05-06" };
+        Show show4 = new Show { title = "Jak wytresowac smoka", date = "2026-05-10" };
+        Show show5 = new Show { title = "Minecraft film", date = "2026-05-3" };
+
+        for (int i = 0; i < 10; i++)
+        {
+            show1.seats.Add(new Seat { number = i, isReserved = false });
+            show2.seats.Add(new Seat { number = i, isReserved = false });
+            show3.seats.Add(new Seat { number = i, isReserved = false });
+            show4.seats.Add(new Seat { number = i, isReserved = false });
+            show5.seats.Add(new Seat { number = i, isReserved = false });
+        }
+
+        shows.Add(show1);
+        shows.Add(show2);
+        shows.Add(show3);
+        shows.Add(show4);
+        shows.Add(show5);
+
+        int choice;
+
+        do
+        {
+            Console.WriteLine("1. Dodaj klienta");
+            Console.WriteLine("2. Rezerwuj bilet");
+            Console.WriteLine("3. Wyswietl bilety klienta");
+            Console.WriteLine("4. Wyswietl seanse i miejsca");
+            Console.WriteLine("0. Wyjscie");
+            Console.Write("Wybor: ");
+
+            if (!int.TryParse(Console.ReadLine(), out choice))
+                continue;
+
+            if (choice == 1)
+            {
+                Customer c = new Customer();
+
+                Console.Write("Imie i nazwisko: ");
+                c.name = Console.ReadLine();
+
+                Console.Write("ID: ");
+                if (!int.TryParse(Console.ReadLine(), out c.id))
+                {
+                    Console.WriteLine("Blad ID");
+                    continue;
+                }
+
+                customers.Add(c);
+                Console.WriteLine("Dodano klienta");
+            }
+
+            else if (choice == 2)
+            {
+                Console.Write("Podaj ID klienta: ");
+                if (!int.TryParse(Console.ReadLine(), out int id))
+                    continue;
+
+                int idx = FindCustomer(customers, id);
+                if (idx == -1)
+                {
+                    Console.WriteLine("Brak klienta");
+                    continue;
+                }
+
+                Console.WriteLine("Seanse:");
+                for (int i = 0; i < shows.Count; i++)
+                {
+                    Console.WriteLine($"{i}. {shows[i].title} ({shows[i].date})");
+                }
+
+                Console.Write("Wybierz seans: ");
+                if (!int.TryParse(Console.ReadLine(), out int showIndex))
+                    continue;
+
+                if (showIndex < 0 || showIndex >= shows.Count)
+                    continue;
+
+                Show selectedShow = shows[showIndex];
+
+                Console.WriteLine("Miejsca:");
+                foreach (var s in selectedShow.seats)
+                {
+                    Console.WriteLine($"{s.number} - {(s.isReserved ? "Zajete" : "Wolne")}");
+                }
+
+                Console.Write("Wybierz miejsce: ");
+                if (!int.TryParse(Console.ReadLine(), out int seatNumber))
+                    continue;
+
+                if (seatNumber < 0 || seatNumber >= selectedShow.seats.Count)
+                    continue;
+
+                if (selectedShow.seats[seatNumber].isReserved)
+                {
+                    Console.WriteLine("Miejsce zajete");
+                    continue;
+                }
+
+                selectedShow.seats[seatNumber].isReserved = true;
+
+                Ticket t = new Ticket
+                {
+                    show = selectedShow,
+                    seat = selectedShow.seats[seatNumber]
+                };
+
+                customers[idx].tickets.Add(t);
+
+                Console.WriteLine("Zarezerwowano bilet");
+            }
+
+            else if (choice == 3)
+            {
+                Console.Write("Podaj ID klienta: ");
+                if (!int.TryParse(Console.ReadLine(), out int id))
+                    continue;
+
+                int idx = FindCustomer(customers, id);
+                if (idx == -1)
+                {
+                    Console.WriteLine("Brak klienta");
+                    continue;
+                }
+
+                var c = customers[idx];
+
+                if (c.tickets.Count == 0)
+                {
+                    Console.WriteLine("Brak biletow");
+                }
+                else
+                {
+                    Console.WriteLine("Bilety:");
+                    foreach (var t in c.tickets)
+                    {
+                        Console.WriteLine($"Seans: {t.show.title}, Data: {t.show.date}, Miejsce: {t.seat.number}");
+                    }
+                }
+            }
+
+            else if (choice == 4)
+            {
+                foreach (var s in shows)
+                {
+                    Console.WriteLine($"{s.title} ({s.date})");
+
+                    foreach (var seat in s.seats)
+                    {
+                        Console.WriteLine($"Miejsce {seat.number}: {(seat.isReserved ? "Zajete" : "Wolne")}");
+                    }
+                }
+            }
+
+        } while (choice != 0);
+    }
+}
